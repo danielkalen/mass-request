@@ -1,6 +1,6 @@
 {
   "name": "mass-request",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "bin": {
@@ -13,14 +13,14 @@
   "license": "ISC",
   "devDependencies": {
     "badge-gen": "^1.0.1",
-    "bluebird": "^3.5.0",
     "chai": "^3.5.0",
-    "coffee-script": "^1.12.4",
     "mocha": "^3.2.0"
   },
   "dependencies": {
     "axios": "^0.15.3",
+    "smart-extend": "^1.3.2",
+    "bluebird": "^3.5.0",
     "minimist": "^1.2.0",
-    "smart-extend": "^1.3.2"
+    "coffee-script": "^1.12.4"
   }
 }
