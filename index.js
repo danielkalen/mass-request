@@ -1,2 +1,2 @@
 require('coffee-script/register');
-require('./lib/mass-request');
+module.exports = require('./lib/mass-request');
