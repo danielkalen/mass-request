@@ -9,7 +9,9 @@ options =
 
 
 require('./mass-request')(options, true)
-	.then console.log
+	.then (res)->
+		console.log "DONE! took #{res.totalTime}s total, #{res.processTime}s without request time"
+	
 	.catch (err)->
 		console.error(err?.message or err)
 		process.exit(1)
