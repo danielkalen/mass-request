@@ -9,6 +9,15 @@ options =
 
 
 require('./mass-request')(options, true)
+	.on 'request', (count)->
+		console.log("Making request ##{count}")
+	
+	.on 'response', (stats)->
+		console.log(stats) if options.debug
+	
+	.on 'failure', (failureCount, count)->
+		console.log("Request ##{count} failed (failure ##{failureCount})")
+
 	.then (res)->
 		console.log "DONE! took #{res.totalTime}s total, #{res.processTime}s without request time"
 	

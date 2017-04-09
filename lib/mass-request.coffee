@@ -1,9 +1,11 @@
+util = require 'util'
 Promise = require 'bluebird'
 axios = require 'axios'
 extend = require 'smart-extend'
 defaults = 
 	times: 5
 	maxFailed: 100
+	milestone: 100
 	delay: 150
 	debug: false
 	url: ''
@@ -15,16 +17,18 @@ module.exports = (options={}, fromCLI)->
 	reqCount = 0
 	totalReqTime = 0
 	processStartTime = process.hrtime()
+	task = new Task()
 
 	makeRequest = ()->
 		reqStartTime = Date.now()
-		console.log("Making request \##{++reqCount}") if fromCLI
+		task.emit('request', ++reqCount)
+		task.emit('milestone', reqCount) if reqCount % options.milestone is 0
 		
 		axios.get(options.url)
 			.then (res)->
 				reqEndTime = Date.now()
 				totalReqTime += reqEndTime-reqStartTime
-				console.log("#{res.status} #{res.statusText} (#{reqEndTime-reqStartTime}ms)") if options.debug and fromCLI
+				task.emit('response', "#{res.status} #{res.statusText} (#{reqEndTime-reqStartTime}ms)")
 
 				if reqCount < options.times
 					Promise.delay(options.delay).then(makeRequest)
@@ -33,11 +37,12 @@ module.exports = (options={}, fromCLI)->
 				if ++failedReqCount >= options.maxFailed
 					Promise.reject(new Error "Too many failed requests (#{failedReqCount} failures)")
 				else
+					task.emit('failure', failedReqCount, reqCount)
 					reqCount--
 					Promise.delay(options.delay).then(makeRequest)
 
 
-	makeRequest().then ()->
+	task.init makeRequest().then ()->
 		processTime = process.hrtime(processStartTime)
 		processTime = processTime[0]+processTime[1]/1e9
 		processTimeNoReq = processTime - totalReqTime/1e3
@@ -50,7 +55,12 @@ module.exports = (options={}, fromCLI)->
 
 
 
-
-
+class Task extends require('events')
+	init: (@task)->
+		@taskPromise = Promise.resolve(@task)
+		return @
+	
+	then: ()-> @taskPromise.then(arguments...)
+	catch: ()-> @taskPromise.catch(arguments...)
 
 
